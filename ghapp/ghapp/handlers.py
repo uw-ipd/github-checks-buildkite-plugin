@@ -1,4 +1,11 @@
-from typing import Optional, Union, List
+import datetime
+import distutils.util
+
+import attr
+import cattr
+from .cattrs import ignore_unknown_attribs
+
+from typing import Optional, Union, List, Dict
 
 from .buildkite import jobs
 from .github import checks
@@ -26,6 +33,7 @@ def buildkite_state_github_conclusion(
         jobs.State.not_run: checks.Conclusion.neutral,
     }.get(state, None)
 
+
 def job_hook_to_check_action(
         job_hook: jobs.JobHook,
         checks_for_commit: List[checks.RunDetails],
@@ -51,11 +59,12 @@ def job_hook_to_check_action(
         action = checks.UpdateRun(
             owner=repo.owner,
             repo=repo.repo,
-            id = current_checks_by_id[check_details.external_id].id,
             run=check_details,
         )
+        action.run.id = current_checks_by_id[check_details.external_id].id
 
     return action
+
 
 def job_to_run_details(job: jobs.Job) -> checks.RunDetails:
     return checks.RunDetails(
@@ -68,3 +77,73 @@ def job_to_run_details(job: jobs.Job) -> checks.RunDetails:
         completed_at=job.finished_at,
         output=None,
     )
+
+
+def job_env_to_run_details(environ: Dict[str, str]) -> checks.RunDetails:
+    job: BuildkiteJobEnviron = \
+        converter.structure(environ, BuildkiteJobEnviron)
+    assert job.BUILDKITE
+    assert job.CI
+
+    now = datetime.datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    if job.BUILDKITE_COMMAND_EXIT_STATUS is None:
+        status = checks.Status.in_progress
+
+        started_at = now
+        completed_at = None
+
+        conclusion = None
+    else:
+        status = checks.Status.completed
+
+        started_at = None
+        completed_at = now
+
+        if job.BUILDKITE_COMMAND_EXIT_STATUS == 0:
+            conclusion = checks.Conclusion.success
+        elif job.BUILDKITE_TIMEOUT:
+            conclusion = checks.Conclusion.timed_out
+        else:
+            conclusion = checks.Conclusion.failure
+
+    return checks.RunDetails(
+        name=job.BUILDKITE_LABEL,
+        head_sha=job.BUILDKITE_COMMIT,
+        head_branch=job.BUILDKITE_BRANCH,
+        details_url=f"{job.BUILDKITE_BUILD_URL}#{job.BUILDKITE_JOB_ID}",
+        external_id=job.BUILDKITE_JOB_ID,
+        status=status,
+        started_at=started_at,
+        completed_at=completed_at,
+        conclusion=conclusion,
+    )
+
+
+converter = cattr.Converter()
+converter.register_structure_hook(
+    bool,
+    lambda o, c:
+        distutils.util.strtobool(o) if isinstance(o, str) else bool(o)
+)
+
+
+@ignore_unknown_attribs(converter=converter)
+@attr.s(auto_attribs=True)
+class BuildkiteJobEnviron:
+    CI: bool
+    BUILDKITE: bool
+
+    BUILDKITE_LABEL: str
+
+    BUILDKITE_BRANCH: str
+    BUILDKITE_COMMIT: str
+
+    BUILDKITE_BUILD_ID: str
+    BUILDKITE_BUILD_NUMBER: str
+    BUILDKITE_BUILD_URL: str
+
+    BUILDKITE_JOB_ID: str
+    BUILDKITE_COMMAND: str
+    BUILDKITE_TIMEOUT: bool
+    BUILDKITE_COMMAND_EXIT_STATUS: Optional[int] = None
