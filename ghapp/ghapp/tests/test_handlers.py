@@ -786,7 +786,7 @@ def test_environs():
 
 
 def test_check_from_job_env(test_environs):
-    start_check = job_env_to_run_details(test_environs["pre_success"])
+    start_check = job_env_to_run_details(cattr.structure(test_environs["pre_success"], jobs.JobEnviron))
 
     assert start_check.name == "Sleepy"
     assert start_check.external_id == "c498dd9c-77d0-42de-be6d-811d9c5156cc"
@@ -800,7 +800,7 @@ def test_check_from_job_env(test_environs):
     assert start_check.completed_at is None
     assert start_check.output is None
 
-    end_check = job_env_to_run_details(test_environs["post_success"])
+    end_check = job_env_to_run_details(cattr.structure(test_environs["post_success"], jobs.JobEnviron))
 
     assert end_check.name == "Sleepy"
     assert end_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
@@ -813,7 +813,7 @@ def test_check_from_job_env(test_environs):
     assert end_check.completed_at is not None
     assert end_check.output is None
 
-    fail_check = job_env_to_run_details(test_environs["post_failure"])
+    fail_check = job_env_to_run_details(cattr.structure(test_environs["post_failure"], jobs.JobEnviron))
 
     assert fail_check.name == "Error"
     assert fail_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
@@ -826,7 +826,7 @@ def test_check_from_job_env(test_environs):
     assert fail_check.completed_at is not None
     assert fail_check.output is None
 
-    timeout_check = job_env_to_run_details(test_environs["post_timeout"])
+    timeout_check = job_env_to_run_details(cattr.structure(test_environs["post_timeout"], jobs.JobEnviron))
 
     assert timeout_check.name == "Teen Sleep"
     assert timeout_check.head_sha == "e275658387fd2d5e0452c51c910fe214e391432b"
@@ -838,5 +838,3 @@ def test_check_from_job_env(test_environs):
     assert timeout_check.conclusion == checks.Conclusion.timed_out
     assert timeout_check.completed_at is not None
     assert timeout_check.output is None
-
-

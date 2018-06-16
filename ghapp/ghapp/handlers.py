@@ -1,10 +1,6 @@
 import datetime
 
-import attr
-import cattr
-from .cattrs import ignore_unknown_attribs
-
-from typing import Optional, Union, List, Dict
+from typing import Optional, Union, List
 
 from .buildkite import jobs
 from .github import checks
@@ -78,9 +74,7 @@ def job_to_run_details(job: jobs.Job) -> checks.RunDetails:
     )
 
 
-def job_env_to_run_details(environ: Dict[str, str]) -> checks.RunDetails:
-    job: BuildkiteJobEnviron = \
-        cattr.structure(environ, BuildkiteJobEnviron)
+def job_env_to_run_details(job: jobs.JobEnviron) -> checks.RunDetails:
     assert job.BUILDKITE
     assert job.CI
 
@@ -117,24 +111,3 @@ def job_env_to_run_details(environ: Dict[str, str]) -> checks.RunDetails:
         completed_at=completed_at,
         conclusion=conclusion,
     )
-
-
-@ignore_unknown_attribs
-@attr.s(auto_attribs=True)
-class BuildkiteJobEnviron:
-    CI: bool
-    BUILDKITE: bool
-
-    BUILDKITE_LABEL: str
-
-    BUILDKITE_BRANCH: str
-    BUILDKITE_COMMIT: str
-
-    BUILDKITE_BUILD_ID: str
-    BUILDKITE_BUILD_NUMBER: str
-    BUILDKITE_BUILD_URL: str
-
-    BUILDKITE_JOB_ID: str
-    BUILDKITE_COMMAND: str
-    BUILDKITE_TIMEOUT: bool
-    BUILDKITE_COMMAND_EXIT_STATUS: Optional[int] = None

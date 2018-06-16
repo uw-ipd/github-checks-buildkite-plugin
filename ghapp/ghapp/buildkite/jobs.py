@@ -80,3 +80,23 @@ class JobHook:
     job: Job
     build: Build
     pipeline: Pipeline
+
+@ignore_unknown_attribs
+@attr.s(auto_attribs=True)
+class JobEnviron:
+    CI: bool
+    BUILDKITE: bool
+
+    BUILDKITE_LABEL: str
+
+    BUILDKITE_BRANCH: str
+    BUILDKITE_COMMIT: str
+
+    BUILDKITE_BUILD_ID: str
+    BUILDKITE_BUILD_NUMBER: str
+    BUILDKITE_BUILD_URL: str
+
+    BUILDKITE_JOB_ID: str
+    BUILDKITE_COMMAND: str
+    BUILDKITE_TIMEOUT: bool
+    BUILDKITE_COMMAND_EXIT_STATUS: Optional[int] = None
