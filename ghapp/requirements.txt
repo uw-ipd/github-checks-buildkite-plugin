@@ -1,0 +1,8 @@
+click
+attrs
+cattrs
+aiohttp
+aiorun
+frozendict
+giturlparse
+decorator

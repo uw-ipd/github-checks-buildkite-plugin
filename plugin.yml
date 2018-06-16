@@ -2,7 +2,6 @@ name: Github Checks
 description: Updates github checks.
 author: https://github.com/buildkite
 requirements:
-  - docker
   - python3.6
 configuration:
   properties:

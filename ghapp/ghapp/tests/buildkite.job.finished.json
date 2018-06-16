@@ -1,0 +1,141 @@
+{
+  "event": "job.finished",
+  "job": {
+    "id": "61f6162e-e06c-4c1d-ba43-b1e13e276f3f",
+    "type": "script",
+    "name": ":shrug: Testing",
+    "agent_query_rules": [
+
+    ],
+    "state": "passed",
+    "build_url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines/tmol/builds/146",
+    "web_url": "https://buildkite.com/uw-ipd/tmol/builds/146#61f6162e-e06c-4c1d-ba43-b1e13e276f3f",
+    "log_url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines/tmol/builds/146/jobs/61f6162e-e06c-4c1d-ba43-b1e13e276f3f/log",
+    "raw_log_url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines/tmol/builds/146/jobs/61f6162e-e06c-4c1d-ba43-b1e13e276f3f/log.txt",
+    "artifacts_url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines/tmol/builds/146/jobs/61f6162e-e06c-4c1d-ba43-b1e13e276f3f/artifacts",
+    "command": ".buildkite/bin/testing",
+    "exit_status": 0,
+    "artifact_paths": "testing.junit.xml;.coverage",
+    "agent": {
+      "id": "01e60648-b418-4f37-a317-d1bd85a09d55",
+      "url": "https://api.buildkite.com/v2/organizations/uw-ipd/agents/01e60648-b418-4f37-a317-d1bd85a09d55",
+      "web_url": "https://buildkite.com/organizations/uw-ipd/agents/01e60648-b418-4f37-a317-d1bd85a09d55",
+      "name": "mako",
+      "connection_state": "connected",
+      "ip_address": "205.175.118.178",
+      "hostname": "033da9c495b7",
+      "user_agent": "buildkite-agent/3.2.0.2432 (linux; amd64)",
+      "version": "3.2.0",
+      "creator": null,
+      "created_at": "2018-06-14 02:34:27 UTC",
+      "job": null,
+      "last_job_finished_at": "2018-06-14 02:41:12 UTC",
+      "priority": 0,
+      "meta_data": [
+        "\"queue=default",
+        "host=mako",
+        "docker=1.13.1",
+        "nvidia_docker=2.0.3",
+        "nvidia_device=GeForce_GTX_1050\""
+      ]
+    },
+    "created_at": "2018-06-14 02:34:30 UTC",
+    "scheduled_at": "2018-06-14 02:34:13 UTC",
+    "started_at": "2018-06-14 02:39:59 UTC",
+    "finished_at": "2018-06-14 02:41:12 UTC",
+    "retried": false,
+    "retried_in_job_id": null,
+    "retries_count": null
+  },
+  "build": {
+    "id": "f4f4b795-ab95-4444-a62c-16c58c2edb65",
+    "url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines/tmol/builds/146",
+    "web_url": "https://buildkite.com/uw-ipd/tmol/builds/146",
+    "number": 146,
+    "state": "running",
+    "blocked": false,
+    "message": "Test updated https endpoint.",
+    "commit": "45c4577a6292036db032e30614fe13107d503204",
+    "branch": "master",
+    "tag": null,
+    "source": "ui",
+    "creator": {
+      "id": "3164ff5e-4b06-4dc1-8fcd-69684b72f531",
+      "name": "Alex Ford",
+      "email": "fordas@uw.edu",
+      "avatar_url": "https://www.gravatar.com/avatar/c6a833c7aab8cac7163652dd7619749b",
+      "created_at": "2017-11-11 22:10:30 UTC"
+    },
+    "created_at": "2018-06-14 02:34:13 UTC",
+    "scheduled_at": "2018-06-14 02:34:13 UTC",
+    "started_at": "2018-06-14 02:34:28 UTC",
+    "finished_at": null,
+    "meta_data": {
+      "buildkite:git:commit": "commit 45c4577a6292036db032e30614fe13107d503204\nAuthor:     Alex Ford <fordas@uw.edu>\nAuthorDate: Fri Jun 8 10:16:06 2018 -0700\nCommit:     GitHub <noreply@github.com>\nCommitDate: Fri Jun 8 10:16:06 2018 -0700\n\n    Initialize score graph via cooperative factory functions. (#72)\n    \n    * Move `tmol.system.residue` namespace `tmol.system`.\n    \n    * Defer default database resolution, add score graph database component.\n    \n    Refactor `tmol.database` to defer import of default parameter database until\n    requested, rather than loading on import of `tmol.database`. Convert default\n    database to an get function and cached property on `ParameterDatabase`, rather\n    than a module-level property. Similar updates to `ResidueReader`, initializing\n    reader when required and caching default.\n    \n    Add a `ParamDB` component to score graph, providing `ParameterDatabase`\n    instance for subcomponents. Update ljlk/hbond components to derive\n    *default* databases from `ParamDB`, but allow override of term-specific\n    databases if needed.\n    \n    * Move graph init parameter resolution into factory functions.\n    \n    Add `cooperative_superclass_factory`, a support function for defining\n    cooperative factory/builder class functions for mixin-based classes.\n    Add basic test of  `cooperative_superclass_factory` as well as tests of\n    different usage idioms.\n    \n    Add `tmol.score.factory.Factory` graph component, utilizing\n    `cooperative_superclass_factory` to manage graph initialization from arbitrary\n    input. Exposes top-level `build_for` function, dispatching into component-\n    specific `factory_for` functions, each providing resolution of the component's\n    required `__init__` kwargs.  Update device, bonded atom, coordinate, database,\n    ljlk, and hbond graph components with default `clone`-like `factory_for`\n    implementations. Add singledispatch-based `factory_for` override hooks to\n    coordinate and bonded atom graph components.\n    \n    Refactor `tmol.system.score` to partition score graph parameter resolution into\n    component-specific `factory_for` overloads under `tmol.system.score_support`.\n    Add support for bonded_atom and coordinate resolution for `tmol.system`\n    components.\n    \n    Update test components to use `tmol.score.factory` interface, rather\n    than `tmol.system.score`. Remove total_score smoke tests, which are\n    subsumed by total_score benchmark tests.\n    \n    * Add Mapping/MutableMapping mixins for attrs classes.\n    \n    Adds mixin classes enhancing attrs classes with Mapping and MutableMapping\n    `collections.abc` interfaces, with keys/values of `attr` attributes."
+    },
+    "pull_request": null
+  },
+  "pipeline": {
+    "id": "8ecc6c33-d758-4196-96e5-866d52c2a433",
+    "url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines/tmol",
+    "web_url": "https://buildkite.com/uw-ipd/tmol",
+    "name": "tmol",
+    "description": "",
+    "slug": "tmol",
+    "repository": "https://github.com/uw-ipd/tmol",
+    "branch_configuration": "",
+    "default_branch": "master",
+    "skip_queued_branch_builds": false,
+    "skip_queued_branch_builds_filter": null,
+    "cancel_running_branch_builds": false,
+    "cancel_running_branch_builds_filter": null,
+    "provider": {
+      "id": "github",
+      "settings": {
+        "trigger_mode": "code",
+        "build_pull_requests": true,
+        "pull_request_branch_filter_enabled": false,
+        "skip_pull_request_builds_for_existing_commits": true,
+        "build_pull_request_forks": false,
+        "prefix_pull_request_fork_branch_names": true,
+        "build_tags": false,
+        "publish_commit_status": true,
+        "publish_commit_status_per_step": true,
+        "repository": "uw-ipd/tmol",
+        "pull_request_branch_filter_configuration": ""
+      },
+      "webhook_url": "https://webhook.buildkite.com/deliver/8d60ffa7381f6fc7786e378835f3eb0738223fcf4f2bb1a616"
+    },
+    "builds_url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines/tmol/builds",
+    "badge_url": "https://badge.buildkite.com/0608cfe87394e48f6ffd7008b0634cb5be1b807e4b25f0d3e1.svg",
+    "created_at": "2018-05-13 03:54:49 UTC",
+    "env": {
+    },
+    "scheduled_builds_count": 0,
+    "running_builds_count": 1,
+    "scheduled_jobs_count": 3,
+    "running_jobs_count": 1,
+    "waiting_jobs_count": 0,
+    "steps": [
+      {
+        "type": "script",
+        "name": ":pipeline:",
+        "command": "buildkite-agent pipeline upload",
+        "artifact_paths": "",
+        "branch_configuration": "",
+        "env": {
+        },
+        "timeout_in_minutes": null,
+        "agent_query_rules": [
+
+        ],
+        "concurrency": null,
+        "parallelism": null
+      }
+    ]
+  },
+  "sender": {
+    "id": "3164ff5e-4b06-4dc1-8fcd-69684b72f531",
+    "name": "Alex Ford"
+  }
+}

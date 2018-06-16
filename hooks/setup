@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e 
+set -x
+
+pushd `dirname $BASH_SOURCE`
+
+if [ ! -d venv ]; then
+  echo Create env
+  python3 -m venv --system-site-packages venv
+fi
+
+echo Install app
+TMPDIR=venv/tmp venv/bin/pip install ../ghapp

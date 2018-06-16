@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -euo pipefail
+
+pushd `dirname $BASH_SOURCE`
+
+./echo-env
+
+popd

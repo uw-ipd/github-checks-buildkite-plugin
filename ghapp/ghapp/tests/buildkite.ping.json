@@ -1,0 +1,25 @@
+{
+  "event": "ping",
+  "service": {
+    "id": "c4cc57f8-635c-409c-8ce8-9c961efc30eb",
+    "provider": "webhook",
+    "settings": {
+      "url": "https://asford-gh-app-sand.localtunnel.me/webhooks/buildkite"
+    }
+  },
+  "organization": {
+    "id": "61f78f0a-8df6-4665-8e42-80aa3cdb7c86",
+    "url": "https://api.buildkite.com/v2/organizations/uw-ipd",
+    "web_url": "https://buildkite.com/uw-ipd",
+    "name": "UW IPD",
+    "slug": "uw-ipd",
+    "agents_url": "https://api.buildkite.com/v2/organizations/uw-ipd/agents",
+    "emojis_url": "https://api.buildkite.com/v2/organizations/uw-ipd/emojis",
+    "created_at": "2017-11-11 22:10:45 UTC",
+    "pipelines_url": "https://api.buildkite.com/v2/organizations/uw-ipd/pipelines"
+  },
+  "sender": {
+    "id": "3164ff5e-4b06-4dc1-8fcd-69684b72f531",
+    "name": "Alex Ford"
+  }
+}
