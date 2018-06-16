@@ -5,6 +5,6 @@ pushd `dirname $BASH_SOURCE`/..
 
 python3 -c 'import os; import pprint; pprint.pprint(dict(os.environ))'
 
-hooks/ghapp current
+hooks/ghapp check from_job_env
 
 popd
