@@ -22,17 +22,19 @@ if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_PRIVATE_KEY:-}" ]] ; then
   GITHUB_APP_AUTH_KEY="${BUILDKITE_PLUGIN_GITHUB_CHECKS_PRIVATE_KEY}"
 fi
 
+docker-compose build ghapp
+
 set +x
 if [[ -f "${GITHUB_APP_AUTH_ID:-}" ]] ; then
+  echo "+ GITHUB_APP_AUTH_ID=\$(cat ${GITHUB_APP_AUTH_ID})"
   GITHUB_APP_AUTH_ID=$(cat ${GITHUB_APP_AUTH_ID})
 fi
-set -x
 
 if [[ -f "${GITHUB_APP_AUTH_KEY:-}" ]] ; then
+  echo "+ GITHUB_APP_AUTH_KEY=\$(cat ${GITHUB_APP_AUTH_KEY})"
   GITHUB_APP_AUTH_KEY=$(cat ${GITHUB_APP_AUTH_KEY})
 fi
-
-docker-compose build ghapp
+set -x
 docker-compose run ghapp "${args[@]}" $*
 
 popd
