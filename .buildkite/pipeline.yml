@@ -1,0 +1,5 @@
+steps:
+  - label: Sleepy
+    command: sleep 3
+  - label: Error
+    command: exit 1
