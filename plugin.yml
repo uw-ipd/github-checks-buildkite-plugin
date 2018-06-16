@@ -5,4 +5,10 @@ requirements:
   - python3.6
 configuration:
   properties:
+    debug:
+      type: boolean
+    app_id:
+      type: str
+    private_key:
+      type: str
   additionalProperties: false
