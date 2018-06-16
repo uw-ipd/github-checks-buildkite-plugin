@@ -10,28 +10,33 @@ pushd `dirname $BASH_SOURCE`/..
 
 args=()
 
+docker-compose build ghapp
+
 if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
   args+=("-vv")
 else
   args+=("-v")
 fi
 
+# Weaken security in the name of convenience. Pass the private-key and id as
+# env vars *if* they're specified as paths in the current environment. Saves
+# the trouble of determining how to pass mounts into the run container, as we
+# *may* be inside a container ourselves.
 if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_APP_ID:-}" ]] ; then
   GITHUB_APP_AUTH_ID="${BUILDKITE_PLUGIN_GITHUB_CHECKS_APP_ID}"
+fi
+
+if [[ -f "${GITHUB_APP_AUTH_ID:-}" ]] ; then
+  echo "+ GITHUB_APP_AUTH_ID=\$(cat ${GITHUB_APP_AUTH_ID})"
+  GITHUB_APP_AUTH_ID=$(cat ${GITHUB_APP_AUTH_ID})
 fi
 
 if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_PRIVATE_KEY:-}" ]] ; then
   GITHUB_APP_AUTH_KEY="${BUILDKITE_PLUGIN_GITHUB_CHECKS_PRIVATE_KEY}"
 fi
 
-docker-compose build ghapp
-
+# set +x so we don't leak file contents
 set +x
-if [[ -f "${GITHUB_APP_AUTH_ID:-}" ]] ; then
-  echo "+ GITHUB_APP_AUTH_ID=\$(cat ${GITHUB_APP_AUTH_ID})"
-  GITHUB_APP_AUTH_ID=$(cat ${GITHUB_APP_AUTH_ID})
-fi
-
 if [[ -f "${GITHUB_APP_AUTH_KEY:-}" ]] ; then
   echo "+ GITHUB_APP_AUTH_KEY=\$(cat ${GITHUB_APP_AUTH_KEY})"
   GITHUB_APP_AUTH_KEY=$(cat ${GITHUB_APP_AUTH_KEY})
