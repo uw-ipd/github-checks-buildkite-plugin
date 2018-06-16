@@ -1,6 +1,31 @@
-version: '2'
+version: '2.3'
 services:
   tests:
     image: buildkite/plugin-tester:latest@sha256:a784b49bb241291feb47b578a2cb58938d3565dff5b0f6d9bf627036cbd7f419
     volumes:
       - ".:/plugin:ro"
+  ghapp:
+    build:
+      context: ghapp
+      dockerfile: Dockerfile
+    volumes:
+      - "buildkite:/buildkite"
+    environment:
+      - BUILDKITE
+      - BUILDKITE_PIPELINE_SLUG
+      - BUILDKITE_AGENT_NAME
+      - BUILDKITE_BRANCH
+      - BUILDKITE_BUILD_NUMBER
+      - BUILDKITE_JOB_ID
+      - BUILDKITE_BUILD_ID
+      - BUILDKITE_AGENT_ACCESS_TOKEN
+
+      - BUILDKITE_PLUGIN_GITHUB_CHECKS_APP_ID
+      - BUILDKITE_PLUGIN_GITHUB_CHECKS_PRIVATE_KEY
+
+      - GITHUB_APP_AUTH_ID
+      - GITHUB_APP_AUTH_KEY
+    entrypoint: ghapp
+volumes:
+  buildkite:
+    external: True

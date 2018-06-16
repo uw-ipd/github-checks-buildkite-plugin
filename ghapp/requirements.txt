@@ -6,3 +6,5 @@ aiorun
 frozendict
 giturlparse
 decorator
+PyJWT
+cryptography

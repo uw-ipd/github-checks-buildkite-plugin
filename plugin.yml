@@ -2,7 +2,7 @@ name: Github Checks
 description: Updates github checks.
 author: https://github.com/buildkite
 requirements:
-  - python3.6
+  - docker-compose
 configuration:
   properties:
     debug:

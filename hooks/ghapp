@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e 
+set -x
+
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
+pushd `dirname $BASH_SOURCE`/..
+
+args=()
+
+if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
+  args+=("-v")
+fi
+
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_APP_ID:-}" ]] ; then
+  GITHUB_APP_AUTH_ID="${BUILDKITE_PLUGIN_GITHUB_CHECKS_APP_ID}"
+fi
+
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_PRIVATE_KEY:-}" ]] ; then
+  GITHUB_APP_AUTH_KEY="${BUILDKITE_PLUGIN_GITHUB_CHECKS_PRIVATE_KEY}"
+fi
+
+set +x
+if [[ -f "${GITHUB_APP_AUTH_ID:-}" ]] ; then
+  GITHUB_APP_AUTH_ID=$(cat ${GITHUB_APP_AUTH_ID})
+fi
+set -x
+
+if [[ -f "${GITHUB_APP_AUTH_KEY:-}" ]] ; then
+  GITHUB_APP_AUTH_KEY=$(cat ${GITHUB_APP_AUTH_KEY})
+fi
+
+docker-compose build ghapp
+docker-compose run ghapp "${args[@]}" $*
+
+popd

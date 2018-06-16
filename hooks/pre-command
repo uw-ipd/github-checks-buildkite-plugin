@@ -1,17 +1,10 @@
 #!/bin/bash
-
-export LC_ALL=C.UTF-8
-export LANG=C.UTF-8
-
 set -euo pipefail
 
-HOOK_ROOT=`dirname $BASH_SOURCE`
+pushd `dirname $BASH_SOURCE`/..
 
-pushd `dirname $BASH_SOURCE`
-PATH=$PATH:$HOOK_ROOT:$HOOK_ROOT/venv/bin
+set
 
-echo-env
-setup-venv
-invoke_ghapp current
+hooks/ghapp current
 
 popd
