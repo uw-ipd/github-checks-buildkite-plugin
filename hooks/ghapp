@@ -35,6 +35,7 @@ if [[ -f "${GITHUB_APP_AUTH_KEY:-}" ]] ; then
   GITHUB_APP_AUTH_KEY=$(cat ${GITHUB_APP_AUTH_KEY})
 fi
 set -x
-docker-compose run ghapp "${args[@]}" $*
+
+docker-compose run --rm ghapp "${args[@]}" $*
 
 popd
