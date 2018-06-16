@@ -1,5 +1,4 @@
 import datetime
-import distutils.util
 
 import attr
 import cattr
@@ -81,7 +80,7 @@ def job_to_run_details(job: jobs.Job) -> checks.RunDetails:
 
 def job_env_to_run_details(environ: Dict[str, str]) -> checks.RunDetails:
     job: BuildkiteJobEnviron = \
-        converter.structure(environ, BuildkiteJobEnviron)
+        cattr.structure(environ, BuildkiteJobEnviron)
     assert job.BUILDKITE
     assert job.CI
 
@@ -120,15 +119,7 @@ def job_env_to_run_details(environ: Dict[str, str]) -> checks.RunDetails:
     )
 
 
-converter = cattr.Converter()
-converter.register_structure_hook(
-    bool,
-    lambda o, c:
-        distutils.util.strtobool(o) if isinstance(o, str) else bool(o)
-)
-
-
-@ignore_unknown_attribs(converter=converter)
+@ignore_unknown_attribs
 @attr.s(auto_attribs=True)
 class BuildkiteJobEnviron:
     CI: bool

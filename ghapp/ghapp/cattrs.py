@@ -1,7 +1,16 @@
 import typing
+import distutils.util
 
 import attr
 import cattr
+
+def maybe_parse_bool(obj, cls):
+    if isinstance(obj, (str, bytes)):
+        return distutils.util.strtobool(obj)
+    else:
+        return bool(obj)
+
+cattr.register_structure_hook(bool, maybe_parse_bool)
 
 def _register_ignore_unknown_attribs(cls, converter=None):
     if converter is None:
