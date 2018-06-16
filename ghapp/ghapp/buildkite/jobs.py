@@ -91,6 +91,7 @@ class JobEnviron:
 
     BUILDKITE_BRANCH: str
     BUILDKITE_COMMIT: str
+    BUILDKITE_REPO: str
 
     BUILDKITE_BUILD_ID: str
     BUILDKITE_BUILD_NUMBER: str

@@ -3,23 +3,104 @@ import json
 
 import pytest
 
+import attr
 import cattr
 
 from ..buildkite import jobs
 from ..github import checks
 
-from ..handlers import job_hook_to_check_action, job_env_to_run_details
+from ..handlers import job_hook_to_check_action, job_environ_to_run_details, job_environ_to_check_action
 
 
-@pytest.fixture
-def test_events():
-    bd = os.path.dirname(__file__)
+def test_check_from_job_env(test_environs):
+    job_environs = { k : cattr.structure(v, jobs.JobEnviron) for k, v in test_environs.items() }
+    start_check = job_environ_to_run_details(job_environs["pre_success"])
 
-    return {
-        "job.finished": json.load(open(bd + "/buildkite.job.finished.json")),
-        "job.started": json.load(open(bd + "/buildkite.job.started.json")),
-    }
+    assert start_check.name == "Sleepy"
+    assert start_check.id is None
+    assert start_check.external_id == "c498dd9c-77d0-42de-be6d-811d9c5156cc"
+    assert start_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
+    assert start_check.head_branch == "master"
+    assert start_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/15#c498dd9c-77d0-42de-be6d-811d9c5156cc"
+    assert start_check.external_id == "c498dd9c-77d0-42de-be6d-811d9c5156cc"
+    assert start_check.started_at is not None
+    assert start_check.status == checks.Status.in_progress
+    assert start_check.conclusion is None
+    assert start_check.completed_at is None
+    assert start_check.output is None
 
+    end_check = job_environ_to_run_details(job_environs["post_success"])
+
+    assert end_check.name == "Sleepy"
+    assert end_check.id is None
+    assert end_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
+    assert end_check.head_branch == "master"
+    assert end_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/15#c498dd9c-77d0-42de-be6d-811d9c5156cc"
+    assert end_check.external_id == "c498dd9c-77d0-42de-be6d-811d9c5156cc"
+    assert end_check.started_at is None
+    assert end_check.status == checks.Status.completed
+    assert end_check.conclusion == checks.Conclusion.success
+    assert end_check.completed_at is not None
+    assert end_check.output is None
+
+    fail_check = job_environ_to_run_details(job_environs["post_failure"])
+
+    assert fail_check.name == "Error"
+    assert fail_check.id is None
+    assert fail_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
+    assert fail_check.head_branch == "master"
+    assert fail_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/15#382571ad-af38-40d1-b418-46af6b438ae1"
+    assert fail_check.external_id == "382571ad-af38-40d1-b418-46af6b438ae1"
+    assert fail_check.started_at is None
+    assert fail_check.status == checks.Status.completed
+    assert fail_check.conclusion == checks.Conclusion.failure
+    assert fail_check.completed_at is not None
+    assert fail_check.output is None
+
+    timeout_check = job_environ_to_run_details(job_environs["post_timeout"])
+
+    assert timeout_check.name == "Teen Sleep"
+    assert timeout_check.id is None
+    assert timeout_check.head_sha == "e275658387fd2d5e0452c51c910fe214e391432b"
+    assert timeout_check.head_branch == "master"
+    assert timeout_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/17#063a5b46-02bc-444d-b394-ee3a6b1cca42"
+    assert timeout_check.external_id == "063a5b46-02bc-444d-b394-ee3a6b1cca42"
+    assert timeout_check.started_at is None
+    assert timeout_check.status == checks.Status.completed
+    assert timeout_check.conclusion == checks.Conclusion.timed_out
+    assert timeout_check.completed_at is not None
+    assert timeout_check.output is None
+
+
+def test_job_env_flow(test_environs):
+    job_environs = { k : cattr.structure(v, jobs.JobEnviron) for k, v in test_environs.items() }
+
+    def assert_create(action):
+        assert isinstance(action, checks.CreateRun)
+        assert action.owner == "asford"
+        assert action.repo == "test_checks"
+        assert action.run.id is None
+        assert action.run.head_sha is not None
+        assert action.run.head_branch is not None
+
+    def assert_update(action):
+        assert isinstance(action, checks.UpdateRun)
+        assert action.owner == "asford"
+        assert action.repo == "test_checks"
+        assert action.run.id == "success"
+        assert action.run.head_sha is not None
+        assert action.run.head_branch is not None
+
+    inited = attr.evolve(job_environ_to_run_details(job_environs["pre_success"]), id="success")
+    alt = attr.evolve(job_environ_to_run_details(job_environs["pre_failure"]), id="failure")
+
+    assert_create(job_environ_to_check_action(job_environs["pre_success"], []))
+    assert_create(job_environ_to_check_action(job_environs["post_success"], []))
+    assert_create(job_environ_to_check_action(job_environs["post_success"], [alt]))
+
+    assert_update(job_environ_to_check_action(job_environs["post_success"], [inited]))
+    assert_update(job_environ_to_check_action(job_environs["post_success"], [inited, alt]))
+    assert_update(job_environ_to_check_action(job_environs["post_success"], [alt, inited]))
 
 def test_job_conversion(test_events):
     events = {
@@ -35,6 +116,16 @@ def test_job_conversion(test_events):
 
     just_finished = job_hook_to_check_action(events["job.finished"], [])
     assert isinstance(just_finished, checks.CreateRun)
+
+
+@pytest.fixture
+def test_events():
+    bd = os.path.dirname(__file__)
+
+    return {
+        "job.finished": json.load(open(bd + "/buildkite.job.finished.json")),
+        "job.started": json.load(open(bd + "/buildkite.job.started.json")),
+    }
 
 
 @pytest.fixture
@@ -783,58 +874,3 @@ def test_environs():
             '/usr/bin/python3'
         },
     )
-
-
-def test_check_from_job_env(test_environs):
-    start_check = job_env_to_run_details(cattr.structure(test_environs["pre_success"], jobs.JobEnviron))
-
-    assert start_check.name == "Sleepy"
-    assert start_check.external_id == "c498dd9c-77d0-42de-be6d-811d9c5156cc"
-    assert start_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
-    assert start_check.head_branch == "master"
-    assert start_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/15#c498dd9c-77d0-42de-be6d-811d9c5156cc"
-    assert start_check.external_id == "c498dd9c-77d0-42de-be6d-811d9c5156cc"
-    assert start_check.started_at is not None
-    assert start_check.status == checks.Status.in_progress
-    assert start_check.conclusion is None
-    assert start_check.completed_at is None
-    assert start_check.output is None
-
-    end_check = job_env_to_run_details(cattr.structure(test_environs["post_success"], jobs.JobEnviron))
-
-    assert end_check.name == "Sleepy"
-    assert end_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
-    assert end_check.head_branch == "master"
-    assert end_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/15#c498dd9c-77d0-42de-be6d-811d9c5156cc"
-    assert end_check.external_id == "c498dd9c-77d0-42de-be6d-811d9c5156cc"
-    assert end_check.started_at is None
-    assert end_check.status == checks.Status.completed
-    assert end_check.conclusion == checks.Conclusion.success
-    assert end_check.completed_at is not None
-    assert end_check.output is None
-
-    fail_check = job_env_to_run_details(cattr.structure(test_environs["post_failure"], jobs.JobEnviron))
-
-    assert fail_check.name == "Error"
-    assert fail_check.head_sha == "df998e034720a29ecc301e3d1cc80a3dad085492"
-    assert fail_check.head_branch == "master"
-    assert fail_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/15#382571ad-af38-40d1-b418-46af6b438ae1"
-    assert fail_check.external_id == "382571ad-af38-40d1-b418-46af6b438ae1"
-    assert fail_check.started_at is None
-    assert fail_check.status == checks.Status.completed
-    assert fail_check.conclusion == checks.Conclusion.failure
-    assert fail_check.completed_at is not None
-    assert fail_check.output is None
-
-    timeout_check = job_env_to_run_details(cattr.structure(test_environs["post_timeout"], jobs.JobEnviron))
-
-    assert timeout_check.name == "Teen Sleep"
-    assert timeout_check.head_sha == "e275658387fd2d5e0452c51c910fe214e391432b"
-    assert timeout_check.head_branch == "master"
-    assert timeout_check.details_url == "https://buildkite.com/uw-ipd/test-checks/builds/17#063a5b46-02bc-444d-b394-ee3a6b1cca42"
-    assert timeout_check.external_id == "063a5b46-02bc-444d-b394-ee3a6b1cca42"
-    assert timeout_check.started_at is None
-    assert timeout_check.status == checks.Status.completed
-    assert timeout_check.conclusion == checks.Conclusion.timed_out
-    assert timeout_check.completed_at is not None
-    assert timeout_check.output is None

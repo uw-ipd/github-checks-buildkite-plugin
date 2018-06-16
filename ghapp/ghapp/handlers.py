@@ -74,7 +74,30 @@ def job_to_run_details(job: jobs.Job) -> checks.RunDetails:
     )
 
 
-def job_env_to_run_details(job: jobs.JobEnviron) -> checks.RunDetails:
+def job_environ_to_check_action(
+        job: jobs.JobEnviron,
+        checks_for_commit: List[checks.RunDetails],
+) -> Union[checks.CreateRun, checks.UpdateRun]:
+    run = job_environ_to_run_details(job)
+    repo = giturlparse.parse(job.BUILDKITE_REPO)
+
+    current_check_by_name = {
+        check.name: check
+        for check in checks_for_commit
+    }.get(run.name)
+
+    if current_check_by_name is not None:
+        run.id = current_check_by_name.id
+        return checks.UpdateRun(
+            repo = repo.repo, owner=repo.owner, run = run
+        )
+    else:
+        return checks.CreateRun(
+            repo = repo.repo, owner=repo.owner, run = run
+        )
+
+
+def job_environ_to_run_details(job: jobs.JobEnviron) -> checks.RunDetails:
     assert job.BUILDKITE
     assert job.CI
 
