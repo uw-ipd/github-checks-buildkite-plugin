@@ -1,7 +1,8 @@
-import attr
-
 import logging
 import json
+import os
+
+import cattr
 
 import aiohttp
 import aiorun
@@ -12,6 +13,9 @@ from decorator import decorator
 from .github.identity import AppIdentity
 from .github import checks
 from .github.gitcredentials import credential_helper
+
+from .buildkite import jobs
+from .handlers import RepoName, job_environ_to_check_action
 
 logger = logging.getLogger(__name__)
 
@@ -127,18 +131,12 @@ def check():
 @aiomain
 async def list(app: AppIdentity, repo: str, ref: str):
     """List current checks on given repo ref."""
-    repo = Repo.parse(repo)
+    repo = RepoName.parse(repo)
 
     async with aiohttp.ClientSession(
             headers=await app.installation_headers(repo.owner)) as sesh:
-        checks_url = (
-            f"https://api.github.com"
-            f"/repos/{repo.owner}/{repo.repo}/commits/{ref}/check-runs")
-
-        async with sesh.get(checks_url, headers=checks.api_headers) as resp:
-            logging.debug(resp)
-            resp.raise_for_status()
-            print(json.dumps(await resp.json(), indent=2))
+        fetch = checks.GetRuns(owner=repo.owner, repo=repo.repo, ref=ref)
+        print(await fetch.execute(sesh))
 
 
 @check.add_command
@@ -156,8 +154,8 @@ async def push(
         sha: str,
         name: str,
 ):
-    """List current checks on given repo ref."""
-    repo = Repo.parse(repo)
+    """Push a check to github."""
+    repo = RepoName.parse(repo)
 
     action = checks.CreateRun(
         owner=repo.owner,
@@ -183,6 +181,7 @@ async def push(
 
             print(await resp.json())
 
+
 @check.add_command
 @click.command()
 @pass_appidentity
@@ -197,7 +196,7 @@ async def update(
         name: str,
 ):
     """List current checks on given repo ref."""
-    repo = Repo.parse(repo)
+    repo = RepoName.parse(repo)
 
     action = checks.UpdateRun(
         owner=repo.owner,
@@ -222,24 +221,28 @@ async def update(
 
             print(await resp.json())
 
-@attr.s(auto_attribs=True, frozen=True)
-class Repo:
-    owner: str
-    repo: str
 
-    @classmethod
-    def parse(cls, repo_or_url: str):
-        import urllib
-        parse = urllib.parse.urlparse(repo_or_url)
+@check.add_command
+@click.command()
+@pass_appidentity
+@aiomain
+async def from_job_env(app: AppIdentity, ):
+    job_env = cattr.structure(dict(os.environ), jobs.JobEnviron)
+    logging.info("job_env: %s", job_env)
 
-        if parse.netloc:
-            components = parse.path.lstrip("/").split("/")
-        else:
-            components = parse.path.split("/")
+    repo = RepoName.parse(job_env.BUILDKITE_REPO)
 
-        if not len(components) == 2:
-            raise ValueError(
-                f"Unable to parse: {repo_or_url} Parsed: {components}")
+    async with aiohttp.ClientSession(
+            headers=await app.installation_headers(repo.owner)) as sesh:
 
-        owner, repo = components
-        return cls(owner=owner, repo=repo)
+        current_runs = await checks.GetRuns(
+            owner=repo.owner,
+            repo=repo.repo,
+            ref=job_env.BUILDKITE_COMMIT,
+        ).execute(sesh)
+        logging.info("current_runs: %s", current_runs)
+
+        check_action = job_environ_to_check_action(job_env, current_runs)
+        logging.info("action: %s", check_action)
+
+        await check_action.execute(sesh)

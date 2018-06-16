@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 import aiohttp
 import logging
@@ -7,7 +7,7 @@ import attr
 import cattr
 import enum
 
-from ..cattrs import ignore_optional_none
+from ..cattrs import ignore_optional_none, ignore_unknown_attribs
 
 logger = logging.getLogger(__name__)
 api_headers = {"Accept": "application/vnd.github.antiope-preview+json"}
@@ -29,6 +29,7 @@ class Conclusion(enum.Enum):
 
 
 @ignore_optional_none
+@ignore_unknown_attribs
 @attr.s(auto_attribs=True)
 class Output:
     title: str
@@ -39,6 +40,7 @@ class Output:
 
 
 @ignore_optional_none
+@ignore_unknown_attribs
 @attr.s(auto_attribs=True)
 class RunDetails:
     """Check run input parameters from: https://developer.github.com/v3/checks/runs/"""
@@ -97,3 +99,22 @@ class UpdateRun:
         logger.info('PATCH %s\n%s', url, body)
 
         return session.patch(url, headers=api_headers, json=body)
+
+@attr.s(auto_attribs=True)
+class GetRuns:
+    """Check run input parameters from: https://developer.github.com/v3/checks/runs/"""
+    owner: str
+    repo: str
+    ref: str
+
+    async def execute(self, session: aiohttp.ClientSession)->List[RunDetails]:
+        checks_url = (
+            f"https://api.github.com"
+            f"/repos/{self.owner}/{self.repo}/commits/{self.ref}/check-runs")
+
+        async with session.get(checks_url, headers=api_headers) as resp:
+            logger.debug(resp)
+            resp.raise_for_status()
+            raw_result = await resp.json()
+
+            return cattr.structure(raw_result["check_runs"], List[RunDetails])

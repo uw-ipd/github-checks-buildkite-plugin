@@ -1,3 +1,4 @@
+import attr
 import datetime
 
 from typing import Optional, Union, List
@@ -5,7 +6,28 @@ from typing import Optional, Union, List
 from .buildkite import jobs
 from .github import checks
 
-import giturlparse
+@attr.s(auto_attribs=True, frozen=True)
+class RepoName:
+    """An repo parser allowing both urls and the "owner/name" convention."""
+    owner: str
+    repo: str
+
+    @classmethod
+    def parse(cls, repo_or_url: str):
+        import urllib
+        parse = urllib.parse.urlparse(repo_or_url)
+
+        if parse.netloc:
+            components = parse.path.lstrip("/").split("/")
+        else:
+            components = parse.path.split("/")
+
+        if not len(components) == 2:
+            raise ValueError(
+                f"Unable to parse: {repo_or_url} Parsed: {components}")
+
+        owner, repo = components
+        return cls(owner=owner, repo=repo)
 
 
 def buildkite_state_github_status(state: jobs.State) -> checks.Status:
@@ -35,7 +57,7 @@ def job_hook_to_check_action(
 ) -> Union[checks.CreateRun, checks.UpdateRun]:
     check_details = job_to_run_details(job_hook.job)
 
-    repo = giturlparse.parse(job_hook.pipeline.repository)
+    repo = RepoName.parse(job_hook.pipeline.repository)
 
     current_checks_by_id = {
         check.external_id: check
@@ -79,7 +101,7 @@ def job_environ_to_check_action(
         checks_for_commit: List[checks.RunDetails],
 ) -> Union[checks.CreateRun, checks.UpdateRun]:
     run = job_environ_to_run_details(job)
-    repo = giturlparse.parse(job.BUILDKITE_REPO)
+    repo = RepoName.parse(job.BUILDKITE_REPO)
 
     current_check_by_name = {
         check.name: check
