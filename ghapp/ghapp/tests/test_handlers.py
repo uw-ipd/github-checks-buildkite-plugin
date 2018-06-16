@@ -88,8 +88,8 @@ def test_job_env_flow(test_environs):
         assert action.owner == "asford"
         assert action.repo == "test_checks"
         assert action.run.id == "success"
-        assert action.run.head_sha is not None
-        assert action.run.head_branch is not None
+        assert action.run.head_sha is None
+        assert action.run.head_branch is None
 
     inited = attr.evolve(job_environ_to_run_details(job_environs["pre_success"]), id="success")
     alt = attr.evolve(job_environ_to_run_details(job_environs["pre_failure"]), id="failure")

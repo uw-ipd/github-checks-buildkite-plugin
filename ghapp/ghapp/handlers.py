@@ -110,6 +110,8 @@ def job_environ_to_check_action(
 
     if current_check_by_name is not None:
         run.id = current_check_by_name.id
+        run.head_sha = None
+        run.head_branch = None
         return checks.UpdateRun(
             repo = repo.repo, owner=repo.owner, run = run
         )
