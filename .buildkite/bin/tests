@@ -1,9 +1,12 @@
 #!/bin/bash
 
-set -euo pipefail
+set -xuo pipefail
 
 bats tests/ | tee bats.out
+result=$?
 
 echo '```' > test_summary.md
 cat bats.out >> test_summary.md
 echo '```' >> test_summary.md
+
+exit $result
