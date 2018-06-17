@@ -2,12 +2,9 @@
 
 set -euo pipefail
 
-pushd `dirname $BASH_SOURCE`/..
-
 if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
   set
 fi
-
 
 args=()
 
@@ -23,6 +20,4 @@ if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}" ]] ; then
   args+=("--output_details" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}")
 fi
 
-hooks/ghapp check from_job_env "${args[@]}"
-
-popd
+`dirname $BASH_SOURCE`/ghapp check from_job_env "${args[@]}"
