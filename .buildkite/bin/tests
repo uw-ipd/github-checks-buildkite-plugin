@@ -2,11 +2,12 @@
 
 set -xuo pipefail
 
-bats tests/ | tee bats.out
-result=$?
-
-echo '```' > test_summary.md
-cat bats.out >> test_summary.md
-echo '```' >> test_summary.md
+{
+  echo '# `bats tests/`'
+  echo '```'
+  bats tests/
+  result=$?
+  echo '```'
+} | tee test_summary.md
 
 exit $result
