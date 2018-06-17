@@ -43,4 +43,4 @@ if [[ -f "${GITHUB_APP_AUTH_KEY:-}" ]] ; then
 fi
 set -x
 
-docker-compose -f ${COMPOSE_CONFIG} run --rm ghapp "${args[@]}" $*
+docker-compose -f ${COMPOSE_CONFIG} run --workdir=`pwd` --rm ghapp "${args[@]}" $*
