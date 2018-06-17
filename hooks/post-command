@@ -4,7 +4,9 @@ set -euo pipefail
 
 pushd `dirname $BASH_SOURCE`/..
 
-python3 -c 'import os; import pprint; pprint.pprint(dict(os.environ))'
+if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
+  set
+fi
 
 hooks/ghapp check from_job_env
 

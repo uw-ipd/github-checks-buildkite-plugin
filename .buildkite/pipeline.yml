@@ -1,5 +1,6 @@
 steps:
-  - label: Sleepy
-    command: sleep 3
-  - label: Error
-    command: exit 1
+  - label: Self-test
+    plugins:
+      uw-ipd/docker-compose#default_volumes:
+        run: tests
+        workdir: "${BUILDKITE_BUILD_CHECKOUT_PATH}"

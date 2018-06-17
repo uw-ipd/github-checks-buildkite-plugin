@@ -4,38 +4,30 @@ load '/usr/local/lib/bats/load.bash'
 
 @test "pre-command" {
 
-  stub echo-env \
-    ":"
   stub docker-compose \
     "build ghapp : echo build ghapp" \
-    "run ghapp : echo run ghapp"
+    "run --rm ghapp -v check from_job_env : echo run ghapp -v"
 
   run $PWD/hooks/pre-command
 
   assert_success
 
-  unstub echo-env
-  unstub docker-compomse
+  unstub docker-compose
 }
 
 @test "debug mode" {
 
   export BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG=true
 
-
-
-  stub echo-env \
-    ":"
   stub docker-compose \
     "build ghapp : echo build ghapp" \
-    "run ghapp -v : echo run ghapp -v"
+    "run --rm ghapp -vv check from_job_env : echo run ghapp -vv"
 
   run $PWD/hooks/pre-command
 
   assert_success
 
-  unstub echo-env
-  unstub docker-compomse
+  unstub docker-compose
 
   unset BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG
 
