@@ -6,8 +6,7 @@ set -xuo pipefail
   echo '# `bats tests/`'
   echo '```'
   bats tests/
-  result=$?
+  RESULT=$?
   echo '```'
+  exit $RESULT
 } | tee test_summary.md
-
-exit $result
