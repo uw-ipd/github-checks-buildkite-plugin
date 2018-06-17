@@ -271,11 +271,12 @@ async def from_job_env(
         logging.info("current_runs: %s", current_runs)
 
         check_action = job_environ_to_check_action(job_env, current_runs)
-        logging.info("action: %s", check_action)
-
         output = load_job_output(output_title, output_summary, output)
         if output:
             check_action.run.output = output
+
+        logging.info("action: %s", check_action)
+
 
         await check_action.execute(sesh)
 
@@ -283,6 +284,7 @@ def load_job_output(output_title, output_summary, output):
     """Loads job output (maybe) from files, to be moved to handler layer."""
     def read_if_file(val):
         if os.path.exists(val):
+            logger.info("Reading file: %s", val)
             with open(val, "r") as inf:
                 return inf.read()
         else:
@@ -290,11 +292,12 @@ def load_job_output(output_title, output_summary, output):
 
     if output_title:
         assert output_summary
-        output = checks.Output(
+        return checks.Output(
             title = output_title,
             summary = read_if_file(output_summary),
             text = read_if_file(output) if output else None
         )
     else:
-        output = None
+        return None
+
 

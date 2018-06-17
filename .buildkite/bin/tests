@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -euo pipefail
+
+bats tests/ | tee bats.out
+
+echo '```' > test_summary.md
+cat bats.out >> test_summary.md
+echo '```' >> test_summary.md

@@ -8,6 +8,21 @@ if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
   set
 fi
 
-hooks/ghapp check from_job_env
+
+args=()
+
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_TITLE:-}" ]] ; then
+  args+=("--output_title" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_TITLE:-}")
+fi
+
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_SUMMARY:-}" ]] ; then
+  args+=("--output_summary" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_SUMMARY:-}")
+fi
+
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}" ]] ; then
+  args+=("--output_details" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}")
+fi
+
+hooks/ghapp check from_job_env "${args[@]}"
 
 popd

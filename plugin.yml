@@ -1,10 +1,17 @@
 name: Github Checks
+
 description: Updates github checks.
 author: https://github.com/buildkite
 requirements:
   - docker-compose
 configuration:
   properties:
+    output_title:
+      type: str
+    output_summary:
+      type: str
+    output_details:
+      type: str
     debug:
       type: boolean
     app_id:
