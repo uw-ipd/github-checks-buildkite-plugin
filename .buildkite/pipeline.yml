@@ -5,3 +5,4 @@ steps:
         run: tests
         workdir: "${BUILDKITE_BUILD_CHECKOUT_PATH}"
       uw-ipd/github-checks#${BUILDKITE_COMMIT}:
+        debug: true
