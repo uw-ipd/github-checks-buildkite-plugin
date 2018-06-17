@@ -4,3 +4,4 @@ steps:
       uw-ipd/docker-compose#default_volumes:
         run: tests
         workdir: "${BUILDKITE_BUILD_CHECKOUT_PATH}"
+      uw-ipd/github-checks#${BUILDKITE_COMMIT}:
