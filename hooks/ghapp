@@ -6,11 +6,11 @@ set -x
 export LC_ALL=C.UTF-8
 export LANG=C.UTF-8
 
-pushd `dirname $BASH_SOURCE`/..
+COMPOSE_CONFIG=`dirname $BASH_SOURCE`/../docker-compose.yml
 
 args=()
 
-docker-compose build ghapp
+docker-compose -f ${COMPOSE_CONFIG} build ghapp
 
 if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
   args+=("-vv")
@@ -43,6 +43,4 @@ if [[ -f "${GITHUB_APP_AUTH_KEY:-}" ]] ; then
 fi
 set -x
 
-docker-compose run --rm ghapp "${args[@]}" $*
-
-popd
+docker-compose -f ${COMPOSE_CONFIG} run --workdir=`pwd` --rm ghapp "${args[@]}" $*

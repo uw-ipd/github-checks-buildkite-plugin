@@ -2,10 +2,24 @@
 
 set -euo pipefail
 
-pushd `dirname $BASH_SOURCE`/..
+if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
+  set
+  pwd
+  ls -l
+fi
 
-python3 -c 'import os; import pprint; pprint.pprint(dict(os.environ))'
+args=()
 
-hooks/ghapp check from_job_env
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_TITLE:-}" ]] ; then
+  args+=("--output_title" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_TITLE:-}")
+fi
 
-popd
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_SUMMARY:-}" ]] ; then
+  args+=("--output_summary" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_SUMMARY:-}")
+fi
+
+if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}" ]] ; then
+  args+=("--output_details" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}")
+fi
+
+`dirname $BASH_SOURCE`/ghapp check from_job_env "${args[@]}"

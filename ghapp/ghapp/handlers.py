@@ -6,6 +6,8 @@ from typing import Optional, Union, List
 from .buildkite import jobs
 from .github import checks
 
+import giturlparse
+
 @attr.s(auto_attribs=True, frozen=True)
 class RepoName:
     """An repo parser allowing both urls and the "owner/name" convention."""
@@ -14,20 +16,17 @@ class RepoName:
 
     @classmethod
     def parse(cls, repo_or_url: str):
-        import urllib
-        parse = urllib.parse.urlparse(repo_or_url)
+        url_parse = giturlparse.parse(repo_or_url)
 
-        if parse.netloc:
-            components = parse.path.lstrip("/").split("/")
-        else:
-            components = parse.path.split("/")
+        if not (hasattr(url_parse, "owner") and hasattr(url_parse, "repo")):
+            url = "https://github.com/" + repo_or_url
+            url_parse = giturlparse.parse(url)
 
-        if not len(components) == 2:
+        if not (hasattr(url_parse, "owner") and hasattr(url_parse, "repo")):
             raise ValueError(
-                f"Unable to parse: {repo_or_url} Parsed: {components}")
+                f"Unable to parse: {repo_or_url}")
 
-        owner, repo = components
-        return cls(owner=owner, repo=repo)
+        return cls(owner=url_parse.owner, repo=url_parse.repo)
 
 
 def buildkite_state_github_status(state: jobs.State) -> checks.Status:

@@ -8,7 +8,7 @@ setup(
     description="Sandbox for github app integrationn",
     url='https://github.com/asford/gh_app_sandbox',
 
-    version='0.1.0',
+    version='0.0.2',
 
     packages=find_packages(),
     entry_points={

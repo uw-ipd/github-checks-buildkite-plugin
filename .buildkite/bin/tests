@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -xuo pipefail
+
+{
+  echo '# `bats tests/`'
+  echo '```'
+  bats tests/
+  RESULT=$?
+  echo '```'
+  exit $RESULT
+} | tee test_summary.md

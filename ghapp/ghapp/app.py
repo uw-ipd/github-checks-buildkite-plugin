@@ -30,10 +30,8 @@ class Main:
         sdir = os.path.join(os.path.dirname(__file__), "../secrets/")
 
         app = web.Application(loop=loop)
-        github_hooks = GithubHooks(
-            secret=open(sdir + "/webhooks/github", "rb").read().strip())
-        buildkite_hooks = BuildkiteHooks(
-            token=open(sdir + "/webhooks/buildkite", "r").read().strip())
+        github_hooks = GithubHooks()
+        buildkite_hooks = BuildkiteHooks()
         mind = Mind()
         main = Main(
             app=app,

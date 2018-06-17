@@ -1,5 +1,8 @@
+from typing import Optional, Union
+
 import logging
 import hmac
+import os
 
 import attr
 
@@ -11,7 +14,36 @@ logger = logging.getLogger(__name__)
 
 @attr.s(auto_attribs=True)
 class GithubHooks:
-    secret: bytes
+    SECRET_ENV_VAR = "GITHUB_WEBHOOK_SECRET"
+
+    @staticmethod
+    def _resolve_secret(secret: Optional[Union[str, bytes]] = None) -> bytes:
+        """Resolve secret from env or target file, falling back to `GITHUB_WEBHOOK_SECRET`."""
+        if secret is None:
+            logger.debug("Resolving secret from env.")
+
+            secret = os.getenv(GithubHooks.SECRET_ENV_VAR)
+            if secret is None:
+                raise ValueError("Unable to resolve secret from env: %s" %
+                                 GithubHooks.SECRET_ENV_VAR)
+            logger.info("Resolved %s to secret.",
+                        GithubHooks.SECRET_ENV_VAR)
+
+        if os.path.isfile(secret):
+            logger.info("Resolved secret to filename: %s", secret)
+            secret = open(secret, "rb").read()
+
+        logger.debug("Resolved secret.", secret)
+
+        if isinstance(secret, str):
+            return secret.encode()
+        else:
+            assert isinstance(secret, bytes)
+            return secret
+
+    secret: bytes = attr.ib(
+        converter=_resolve_secret.__func__,
+        default=attr.Factory(lambda: GithubHooks._resolve_secret()))
 
     signals: SignalSet = attr.Factory(SignalSet)
 

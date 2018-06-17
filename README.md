@@ -12,7 +12,9 @@ steps:
   - label: Teen Sleep
     command: sleep 60
     plugins:
-      uw-ipd/github-checks#v0.0.1
+      uw-ipd/github-checks#v0.0.2:
+        output_title: Teen Sleep
+        output_summary: "O, then I see Queen Mab hath been with you!"
 ```
 
 ## Setup
@@ -35,6 +37,15 @@ your private-repo access credentials? Check out
 The hook uses `docker-compose` to manage setup and execution.
 
 ## Configuration
+
+### `output_title` (optional str)
+### `output_summary` (optional path or str)
+### `output_details` (optional path or str)
+
+Specify check report output, as either inline strings *or* paths of build
+products relative to the build root. If `output_title` is specified then
+`output_summary` must be provided. Both the summary and details are rendered as
+markdown.
 
 ### `app_id` (optional path or str)
 

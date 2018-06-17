@@ -1,10 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-pushd `dirname $BASH_SOURCE`/..
+if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
+  set
+fi
 
-python3 -c 'import os; import pprint; pprint.pprint(dict(os.environ))'
-
-hooks/ghapp check from_job_env
-
-popd
+`dirname $BASH_SOURCE`/ghapp check from_job_env

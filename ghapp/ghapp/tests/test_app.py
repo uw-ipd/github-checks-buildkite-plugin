@@ -2,7 +2,7 @@ import pytest
 import os
 import hmac
 
-from ..app import Main
+from ..app import Main, BuildkiteHooks, GithubHooks
 
 
 @pytest.fixture
@@ -33,7 +33,11 @@ async def test_zen(
         github_ping_secret,
         buildkite_ping_body,
         buildkite_ping_secret,
+        monkeypatch,
 ):
+    monkeypatch.setenv(GithubHooks.SECRET_ENV_VAR, github_ping_secret)
+    monkeypatch.setenv(BuildkiteHooks.SECRET_ENV_VAR, buildkite_ping_secret)
+
     client = await test_client(lambda loop: Main.setup(loop=loop).app)
 
     resp = await client.get('/')
@@ -51,7 +55,7 @@ async def test_zen(
             "ping",
             "X-Hub-Signature":
             'sha1=' + hmac.new(
-                github_ping_secret, msg=github_ping_body,
+                github_ping_secret.encode(), msg=github_ping_body,
                 digestmod='sha1').hexdigest(),
             "content-type":
             "application/json",

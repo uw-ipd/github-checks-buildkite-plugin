@@ -1,6 +1,7 @@
 import logging
 import json
 import os
+from typing import Optional
 
 import cattr
 
@@ -144,8 +145,11 @@ async def list(app: AppIdentity, repo: str, ref: str):
 @pass_appidentity
 @click.argument('repo', type=str)
 @click.argument('branch', type=str)
-@click.argument('sha', type=str)
 @click.argument('name', type=str)
+@click.option('--sha', type=str, default=None)
+@click.option('--output_title', type=str, default=None)
+@click.option('--output_summary', type=str, default=None)
+@click.option('--output', type=str, default=None)
 @aiomain
 async def push(
         app: AppIdentity,
@@ -153,22 +157,38 @@ async def push(
         branch: str,
         sha: str,
         name: str,
+        output_title: str,
+        output_summary: Optional[str],
+        output: Optional[str],
 ):
     """Push a check to github."""
     repo = RepoName.parse(repo)
-
-    action = checks.CreateRun(
-        owner=repo.owner,
-        repo=repo.repo,
-        run=checks.RunDetails(
-            head_branch=branch,
-            head_sha=sha,
-            name=name,
-            status=checks.Status.in_progress,
-        ))
+    output = load_job_output(output_title, output_summary, output)
 
     async with aiohttp.ClientSession(
             headers=await app.installation_headers(repo.owner)) as sesh:
+
+        if not sha:
+            logging.info("Resolving branch sha: %s", branch)
+            ref_url = (
+                f"https://api.github.com"
+                f"/repos/{repo.owner}/{repo.repo}/git/refs/heads/{branch}"
+            )
+            logging.debug(ref_url)
+            resp = await sesh.get(ref_url)
+            logging.info(resp)
+            sha = (await resp.json())["object"]["sha"]
+
+        action = checks.CreateRun(
+            owner=repo.owner,
+            repo=repo.repo,
+            run=checks.RunDetails(
+                head_branch=branch,
+                head_sha=sha,
+                name=name,
+                status=checks.Status.in_progress,
+                output = output,
+            ))
 
         async with action.execute(sesh) as resp:
             logging.debug(resp)
@@ -225,8 +245,16 @@ async def update(
 @check.add_command
 @click.command()
 @pass_appidentity
+@click.option('--output_title', type=str, default=None)
+@click.option('--output_summary', type=str, default=None)
+@click.option('--output', type=str, default=None)
 @aiomain
-async def from_job_env(app: AppIdentity, ):
+async def from_job_env(
+    app: AppIdentity,
+    output_title: str,
+    output_summary: Optional[str],
+    output: Optional[str],
+):
     job_env = cattr.structure(dict(os.environ), jobs.JobEnviron)
     logging.info("job_env: %s", job_env)
 
@@ -243,6 +271,33 @@ async def from_job_env(app: AppIdentity, ):
         logging.info("current_runs: %s", current_runs)
 
         check_action = job_environ_to_check_action(job_env, current_runs)
+        output = load_job_output(output_title, output_summary, output)
+        if output:
+            check_action.run.output = output
+
         logging.info("action: %s", check_action)
 
+
         await check_action.execute(sesh)
+
+def load_job_output(output_title, output_summary, output):
+    """Loads job output (maybe) from files, to be moved to handler layer."""
+    def read_if_file(val):
+        if os.path.exists(val):
+            logger.info("Reading file: %s", val)
+            with open(val, "r") as inf:
+                return inf.read()
+        else:
+            return val
+
+    if output_title:
+        assert output_summary
+        return checks.Output(
+            title = output_title,
+            summary = read_if_file(output_summary),
+            text = read_if_file(output) if output else None
+        )
+    else:
+        return None
+
+
