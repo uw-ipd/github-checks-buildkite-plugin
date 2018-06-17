@@ -4,6 +4,8 @@ set -euo pipefail
 
 if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
   set
+  pwd
+  ls -l
 fi
 
 args=()
