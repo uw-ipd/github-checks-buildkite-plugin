@@ -9,7 +9,7 @@ import cattr
 from ..buildkite import jobs
 from ..github import checks
 
-from ..handlers import job_hook_to_check_action, job_environ_to_run_details, job_environ_to_check_action
+from ..handlers import job_hook_to_check_action, job_environ_to_run_details, job_environ_to_check_action, RepoName
 
 
 def test_check_from_job_env(test_environs):
@@ -874,3 +874,18 @@ def test_environs():
             '/usr/bin/python3'
         },
     )
+
+def test_repo_parsing():
+    repos = [
+        "https://github.com/testo/testr",
+        "https://github.com/testo/testr.git",
+        "git@github.com:testo/testr.git",
+        "git@github.com:testo/testr",
+        "testo/testr.git",
+        "testo/testr",
+    ]
+
+    for r in repos:
+        n = RepoName.parse(r)
+        assert n.owner == "testo", r
+        assert n.repo == "testr", r
