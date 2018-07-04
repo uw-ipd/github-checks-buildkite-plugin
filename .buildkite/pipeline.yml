@@ -1,4 +1,12 @@
 steps:
+  - label: Dream
+    command: sleep 1
+    plugins:
+      ${BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
+        output_title: 'O, then I see Queen Mab hath been with you!'
+        output_summary: |
+          ![dream](https://i.gifer.com/ssv.gif)
+          
   - label: Plugin Tests
     command: .buildkite/bin/tests
     plugins:
