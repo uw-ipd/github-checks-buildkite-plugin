@@ -8,6 +8,7 @@ export LANG=C.UTF-8
 
 COMPOSE_CONFIG=`dirname $BASH_SOURCE`/../docker-compose.yml
 
+run_params=()
 args=()
 
 docker-compose -f ${COMPOSE_CONFIG} build ghapp
@@ -43,4 +44,19 @@ if [[ -f "${GITHUB_APP_AUTH_KEY:-}" ]] ; then
 fi
 set -x
 
-docker-compose -f ${COMPOSE_CONFIG} run --workdir=`pwd` --rm ghapp "${args[@]}" $*
+expand_relative_volume_path() {
+  local path="$1"
+  echo "${path/.\//$PWD/}"
+}
+
+IFS=';' read -r -a default_volumes <<< "${BUILDKITE_DOCKER_DEFAULT_VOLUMES:-}"
+for vol in "${default_volumes[@]:-}"
+do
+  # Trim all whitespace when checking for variable definition, handling cases
+  # with repeated delimiters.
+  [[ ! -z "${vol// }" ]] && run_params+=("-v" "$(expand_relative_volume_path "$vol")")
+done
+
+docker-compose -f ${COMPOSE_CONFIG} run "${run_params[@]}" --workdir=`pwd` --rm ghapp "${args[@]}" "$@"
+
+docker-compose -f ${COMPOSE_CONFIG} down

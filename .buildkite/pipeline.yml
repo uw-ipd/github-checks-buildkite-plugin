@@ -2,10 +2,10 @@ steps:
   - label: Plugin Tests
     command: .buildkite/bin/tests
     plugins:
-      uw-ipd/docker-compose#default_volumes:
+      docker-compose#v2.5.0:
         run: tests
         workdir: "${BUILDKITE_BUILD_CHECKOUT_PATH}"
-      uw-ipd/github-checks#${BUILDKITE_COMMIT}:
+      ${BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
         debug: true
-        output_title: 'buildkite/plugin-tester'
+        output_title: 'buildkite/plugin-tests'
         output_summary: test_summary.md
