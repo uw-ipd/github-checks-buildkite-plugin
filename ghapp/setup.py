@@ -24,5 +24,6 @@ setup(
         open("requirements.txt").read()
     ],
 
-    test_requires=["pytest"],
+    setup_requires=["pytest-runner"],
+    tests_require=["pytest", "pytest-aiohttp"],
 )
