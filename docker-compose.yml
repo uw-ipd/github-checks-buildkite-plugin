@@ -8,8 +8,6 @@ services:
     build:
       context: ghapp
       dockerfile: Dockerfile
-    volumes:
-      - "buildkite:/buildkite"
     environment:
       - CI
       - BUILDKITE
@@ -30,6 +28,3 @@ services:
       - GITHUB_APP_AUTH_ID
       - GITHUB_APP_AUTH_KEY
     entrypoint: ghapp
-volumes:
-  buildkite:
-    external: True
