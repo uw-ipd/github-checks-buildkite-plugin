@@ -34,7 +34,11 @@ Now that you've gone to the trouble of registering an app, why not simplify
 your private-repo access credentials? Check out
 [git-credential-github-app-auth](https://github.com/uw-ipd/git-credential-github-app-auth).
 
-The hook uses `docker-compose` to manage setup and execution.
+The hook uses `docker-compose` to manage setup and execution. To upload local
+build products the current working directory _must_ be available as a docker
+mount. Set `BUILDKITE_DOCKER_DEFAULT_VOLUMES` in your agent environment hook
+to ensure that that `BUILDKITE_BUILD_CHECKOUT_PATH` is available. (eg. `export
+BUILDKITE_DOCKER_DEFAULT_VOLUMES=/buildkite/builds:/buildkite/builds`)
 
 ## Configuration
 
