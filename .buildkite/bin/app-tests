@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -xuo pipefail
+
+{
+  echo '# `ghapp/setup.py test`'
+  echo '```'
+  pushd ghapp
+  python3 setup.py test
+  RESULT=$?
+  echo '```'
+  exit $RESULT
+} | tee app_test_summary.md

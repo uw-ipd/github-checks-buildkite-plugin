@@ -4,10 +4,12 @@ services:
     image: buildkite/plugin-tester:latest@sha256:a784b49bb241291feb47b578a2cb58938d3565dff5b0f6d9bf627036cbd7f419
     volumes:
       - ".:/plugin:ro"
-  ghapp:
+  appenv:
     build:
       context: ghapp
       dockerfile: Dockerfile
+  ghapp:
+    extends: appenv
     environment:
       - CI
       - BUILDKITE
@@ -28,3 +30,7 @@ services:
       - GITHUB_APP_AUTH_ID
       - GITHUB_APP_AUTH_KEY
     entrypoint: ghapp
+  ghapp-tests:
+    extends: appenv
+    working_dir: /ghapp
+    entrypoint: python3 setup.py test --addopts -v
