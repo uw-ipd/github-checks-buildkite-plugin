@@ -9,3 +9,14 @@ steps:
         debug: true
         output_title: 'buildkite/plugin-tests'
         output_summary: test_summary.md
+
+  - label: App Tests
+    command: .buildkite/bin/app-tests
+    plugins:
+      docker-compose#v2.5.0:
+        run: appenv
+        workdir: "${BUILDKITE_BUILD_CHECKOUT_PATH}"
+      ${BUILDKITE_REPO}#${BUILDKITE_COMMIT}:
+        debug: true
+        output_title: 'buildkite/ghapp-tests'
+        output_summary: app_test_summary.md
