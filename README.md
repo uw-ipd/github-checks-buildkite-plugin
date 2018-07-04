@@ -5,17 +5,33 @@ A [Buildkite plugin](https://buildkite.com/docs/agent/v3/plugins) for uploading 
 
 ## Example
 
-The following pipeline will sleep in, and let you know it:
+Checks are limited to displaying markdown formatted output, which this plugin
+will faithfully pipe from your build via the checks API. For example, this script:
 
-```yml
-steps:
-  - label: Teen Sleep
-    command: sleep 60
+```bash
+# pytest.sh
+{
+  echo '# pytest'
+  echo '```'
+  pytest -v
+  echo '```'
+} > pytest_summary.md
+```
+
+can be reported via:
+
+```
+  - label: Pytest
+    command: test.sh
     plugins:
       uw-ipd/github-checks#v0.0.2:
-        output_title: Teen Sleep
-        output_summary: "O, then I see Queen Mab hath been with you!"
+        output_title: pytest
+        output_summary: pytest_summary.md
 ```
+
+See this plugin's [pipeline.yml](.buildkite/pipeline.yml) and
+[checks](https://github.com/uw-ipd/github-checks-buildkite-plugin/pull/6/checks)
+for details.
 
 ## Setup
 
