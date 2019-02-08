@@ -20,13 +20,13 @@ will faithfully pipe from your build via the checks API. For example, this scrip
 
 can be reported via:
 
-```
+```yml
   - label: Pytest
     command: test.sh
     plugins:
-      uw-ipd/github-checks#v0.0.2:
-        output_title: pytest
-        output_summary: pytest_summary.md
+      - uw-ipd/github-checks#v0.0.2:
+          output_title: pytest
+          output_summary: pytest_summary.md
 ```
 
 See this plugin's [pipeline.yml](.buildkite/pipeline.yml) and
