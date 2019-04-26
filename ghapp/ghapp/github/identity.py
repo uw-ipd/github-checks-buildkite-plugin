@@ -84,7 +84,7 @@ class AppIdentity:
         See:
             https://developer.github.com/apps/building-github-apps/authenticating-with-github-apps/#authenticating-as-an-installation
         """
-        issue_time = time.time() - 1
+        issue_time = int(time.time())
         payload = dict(
             iat=issue_time, exp=issue_time + (10 * 60), iss=self.app_id)
 
