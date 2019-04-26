@@ -22,4 +22,4 @@ if [[ -n "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}" ]] ; then
   args+=("--output_details" "${BUILDKITE_PLUGIN_GITHUB_CHECKS_OUTPUT_DETAILS:-}")
 fi
 
-`dirname $BASH_SOURCE`/ghapp check from_job_env "${args[@]}"
+`dirname $BASH_SOURCE`/ghapp check from-job-env "${args[@]}"

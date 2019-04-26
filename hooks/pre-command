@@ -5,4 +5,4 @@ if [[ "${BUILDKITE_PLUGIN_GITHUB_CHECKS_DEBUG:-false}" =~ (true|on|1) ]] ; then
   set
 fi
 
-`dirname $BASH_SOURCE`/ghapp check from_job_env
+`dirname $BASH_SOURCE`/ghapp check from-job-env

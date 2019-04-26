@@ -7,7 +7,7 @@ load '/usr/local/lib/bats/load.bash'
 
   stub docker-compose \
     "-f ${DCYML} build ghapp : echo build ghapp" \
-    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -v check from_job_env : echo run ghapp" \
+    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -v check from-job-env : echo run ghapp" \
     "-f ${DCYML} down  : echo down"
 
   run $PWD/hooks/pre-command
@@ -24,7 +24,7 @@ load '/usr/local/lib/bats/load.bash'
 
   stub docker-compose \
     "-f ${DCYML} build ghapp : echo build ghapp" \
-    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -vv check from_job_env : echo run ghapp" \
+    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -vv check from-job-env : echo run ghapp" \
     "-f ${DCYML} down  : echo down"
 
   run $PWD/hooks/pre-command
@@ -45,7 +45,7 @@ load '/usr/local/lib/bats/load.bash'
 
   stub docker-compose \
     "-f ${DCYML} build ghapp : echo build ghapp" \
-    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -v check from_job_env : echo run ghapp" \
+    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -v check from-job-env : echo run ghapp" \
     "-f ${DCYML} down  : echo down"
 
   run $PWD/hooks/pre-command
@@ -56,7 +56,7 @@ load '/usr/local/lib/bats/load.bash'
 
   stub docker-compose \
     "-f ${DCYML} build ghapp : echo build ghapp" \
-    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -v check from_job_env --output_title Test --output_summary summary.md : echo run ghapp" \
+    "-f ${DCYML} run --workdir=${PWD} --rm ghapp -v check from-job-env --output_title Test --output_summary summary.md : echo run ghapp" \
     "-f ${DCYML} down  : echo down"
 
   run $PWD/hooks/post-command
@@ -76,7 +76,7 @@ load '/usr/local/lib/bats/load.bash'
 
   stub docker-compose \
     "-f ${DCYML} build ghapp : echo build ghapp" \
-    "-f ${DCYML} run -v buildkite:/buildkite --workdir=${PWD} --rm ghapp -v check from_job_env : echo run ghapp" \
+    "-f ${DCYML} run -v buildkite:/buildkite --workdir=${PWD} --rm ghapp -v check from-job-env : echo run ghapp" \
     "-f ${DCYML} down  : echo down"
 
   run $PWD/hooks/pre-command
